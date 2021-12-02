@@ -1,0 +1,44 @@
+version: '3' #wersja
+#serwisy
+services:
+  nginx: # serwis nginx
+    image: nginx:1.19 #podanie obrazu nginx
+    ports:
+      - 6002:80 #ustawienie portow(zamiast 6666 ustawilem 6002 poniewaz 6666 byl zajety)
+    networks: #podlaczenie do odpowiednich sieci
+      - frontend
+      - backend
+    volumes: # wolumeny
+      - ./src:/var/www/php
+      - ./.docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on: #uzaleznienie od php
+      - php
+  
+  php: #serwis php
+    image: php:8.0-fpm #podanie obrazu php
+    volumes: #wolumen
+      - ./src:/var/www/php
+    networks: #podlaczenie do odpowiedniej sieci
+      - backend
+  
+  mysql: #serwis mysql
+    image: mysql:latest #podanie obrazu mysql
+    environment: #zmienna srodowiskowa
+      MYSQL_ROOT_PASSWORD: 'root' #ustawienie hasla root dla root-a 
+    volumes: #wolumen
+      - ./database:/var/lib/mysql
+    networks: #podlaczenie do odpowiedniej sieci
+      - backend
+
+  phpmyadmin: #serwis phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest #podanie obrazu phpmyadmin
+    links: #polaczenie z baza danych mysql
+      - 'mysql:db'
+    ports: #ustawienie portow
+      - 6001:80
+    networks: #podlaczenie do odpowiedniej sieci
+      - backend
+
+networks: #utworzenie sieci
+  frontend:
+  backend:
